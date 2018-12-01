@@ -16,9 +16,7 @@ export default class App extends Component<Props> {
     return (
       <View style={styles.container}>
       <Text>Tryna chill</Text>
-        <FBLoginButton>
-          
-        </FBLoginButton>
+        <FBLoginButton/>
         <Text style={styles.instructions}>Tryna join? Login with facebook.</Text>
       </View>
     );
