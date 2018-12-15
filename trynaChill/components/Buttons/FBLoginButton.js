@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
-import { LoginButton } from 'react-native-fbsdk';
+import { LoginButton , AccessToken} from 'react-native-fbsdk';
+import axios from 'axios';
+import { AsyncStorage } from "react-native";
 
 export default class FBLoginButton extends Component {
   render() {
-    console.log("fb login button clicked");
     return (
       <View>
         <LoginButton
-          readPermissions={["email"]}
+          readPermissions={["email","public_profile"]}
           onLoginFinished={
             (error, result) => {
               if (error) {
@@ -16,7 +17,33 @@ export default class FBLoginButton extends Component {
               } else if (result.isCancelled) {
                 alert("Login was cancelled");
               } else {
-                alert("Login was successful with permissions: " + result.grantedPermissions)
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    axios.post("https://8ac5fca9.ngrok.io/api/auth/facebook/callback", {
+                      access_token: data.accessToken,
+                    }, {
+                      headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                      }
+                    }
+                    )
+                    .then(function(response) {
+                      const {data} = response;
+                        _storeData = async () => {
+                          try {
+                            await AsyncStorage.setItem('userId', data.user_id);
+                            this.props.navigation.navigate('Profile');
+                          } catch (error) {
+                            // Error saving data
+                            console.log(error.message);
+                          }
+                        }
+                    })
+                    .catch(function(err) {
+                      console.log("fucking error");
+                    })
+                  }
+                )
               }
             }
           }
